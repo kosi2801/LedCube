@@ -107,8 +107,8 @@ int main(int argc, char **argv)
     // init cube and set some voxels
     Cube cube;
     cube.setVoxel(0,0,0,1);
-    cube.setVoxel(1,1,1,1);
-    cube.setVoxel(2,2,2,1);
+    cube.setVoxel(1,1,1,100);
+    cube.setVoxel(2,2,2,10);
     
     // required for performance measurement
     timeval current_time, last_second;
@@ -152,7 +152,15 @@ int main(int argc, char **argv)
             clock_it(gpio);
 
             // 9 cube pins
-            uint cube_bits = cube.getLayerBitfield(layer);            
+            // if target Hz>255 enable BAM
+            uint cube_bits;
+            if(target_hz > 255)
+            {
+                cube_bits = cube.getLayerBamBitfield(layer, count%256);
+            } else {
+                cube_bits = cube.getLayerBitfield(layer);
+            }
+            
             for(int i=0; i<9; ++i) {
                 (cube_bits & (1<<i)) ? gpio.setPort(SD1) : gpio.clearPort(SD1);
                 clock_it(gpio);
