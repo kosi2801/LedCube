@@ -109,6 +109,10 @@ int main(int argc, char **argv)
     cube.setVoxel(0,0,0,1);
     cube.setVoxel(1,1,1,100);
     cube.setVoxel(2,2,2,10);
+    for(int x=0; x<3; ++x)
+        for(int y=0; y<3; ++y)
+            for(int z=0; z<3; ++z)
+                cube.setVoxel(x, y, z, (9*x)+(9*3*y)+(9*3*3*z)+1);
     
     // required for performance measurement
     timeval current_time, last_second;
