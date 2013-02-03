@@ -159,6 +159,7 @@ static void doInputCheck()
                 if(pause != NULL) {
                     // already paused, restore old anim and remove pause
                     animation = pause->getPausedAnimation();
+                    pause->setPausedAnimation(NULL); // don't forget or it will delete our old animation when destructed
                     delete pause;
                 } else {
                     animation = new AnimationPause(animation);
@@ -186,7 +187,6 @@ static void doInputCheck()
                     break;
             }
         }
-
 }
 
 static void finish(int sig)

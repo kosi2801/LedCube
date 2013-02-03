@@ -10,12 +10,18 @@ AnimationPause::AnimationPause(Animation* animationToPause)
 
 AnimationPause::~AnimationPause()
 {
-    ;
+    if(pausedAnimation != NULL)
+        delete pausedAnimation;
 }
 
 Animation* AnimationPause::getPausedAnimation()
 {
     return pausedAnimation;
+}
+
+void AnimationPause::setPausedAnimation(Animation* animation)
+{
+    pausedAnimation = animation;
 }
 
 long AnimationPause::getFrameMs()
