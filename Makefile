@@ -1,35 +1,62 @@
-CFLAGS=-funroll-loops -flto -O3 -lncurses
+SHELL = /bin/bash
+TARGET = cube
 
+ifndef BC
+	BC=debug
+endif
 
-all: cube
+CC = g++
+CFLAGS = -Wall -lncurses
+DEFINES = -DMY_SYMBOL
+INCPATH = -Iinclude/
 
-cube: main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o	AnimationRunningLight.o AnimationPause.o
-	g++ $(CFLAGS) main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o AnimationRunningLight.o AnimationPause.o -o cube 
+ifeq ($(BC),debug)
+	CFLAGS += -g3 
+else
+	CFLAGS += -funroll-loops -flto -O3
+endif
 
-main.o: main.cxx
-	g++ $(CFLAGS) -c main.cxx
+DEPDIR=$(BC)/deps
+OBJDIR=$(BC)/objs
+SRCDIR=src/
 
-GPIO_Access.o: GPIO_Access.cxx GPIO_Access.h
-	g++ $(CFLAGS) -c GPIO_Access.cxx
+# Build a list of the object files to create, based on the .cpps we find
+OTMP = $(patsubst $(SRCDIR)%.cxx,%.o,$(wildcard $(SRCDIR)*.cxx))
 
-Cube.o: Cube.cxx Cube.h
-	g++ $(CFLAGS) -c Cube.cxx
-	
-Tools.o: Tools.cxx Tools.h
-	g++ $(CFLAGS) -c Tools.cxx
+# Build the final list of objects
+OBJS = $(patsubst %,$(OBJDIR)/%,$(OTMP))
 
-Timing.o: Timing.cxx Timing.h
-	g++ $(CFLAGS) -c Timing.cxx
+# Build a list of dependency files
+DEPS = $(patsubst %.o,$(DEPDIR)/%.d,$(OTMP))
 
-AnimationPause.o: AnimationPause.cxx AnimationPause.h
-	g++ $(CFLAGS) -c AnimationPause.cxx
+all: init $(OBJS)
+	$(CC) $(DEFINES) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-AnimationCubePulse.o: AnimationCubePulse.cxx AnimationCubePulse.h
-	g++ $(CFLAGS) -c AnimationCubePulse.cxx
+init:
+	mkdir -p $(DEPDIR)
+	mkdir -p $(OBJDIR)
 
-AnimationRunningLight.o: AnimationRunningLight.cxx AnimationRunningLight.h
-	g++ $(CFLAGS) -c AnimationRunningLight.cxx
+# Pull in dependency info for our objects
+-include $(DEPS)
+
+# Compile and generate dependency info
+# 1. Compile the .cpp file
+# 2. Generate dependency information, explicitly specifying the target name
+# 3. The final three lines do a little bit of sed magic. The following
+#    sub-items all correspond to the single sed command below:
+#    a. sed: Strip the target (everything before the colon)
+#    b. sed: Remove any continuation backslashes
+#    c. fmt -1: List words one per line
+#    d. sed: Strip leading spaces
+#    e. sed: Add trailing colons
+$(OBJDIR)/%.o : $(SRCDIR)%.cxx
+	$(CC) $(DEFINES) $(CFLAGS) $(INCPATH) -o $@ -c $<
+	$(CC) -MM -MT $(OBJDIR)/$*.o $(DEFINES) $(CFLAGS) $(INCPATH) $(SRCDIR)$*.cxx > $(DEPDIR)/$*.d
+	@cp -f $(DEPDIR)/$*.d $(DEPDIR)/$*.d.tmp
+	@sed -e 's/.*://' -e 's/\\$$//' < $(DEPDIR)/$*.d.tmp | fmt -1 | sed -e 's/^ *//' -e 's/$$/:/' >> $(DEPDIR)/$*.d
+	@rm -f $(DEPDIR)/$*.d.tmp
 
 clean:
-	rm -rf *o cube
-
+	rm -fr debug/*
+	rm -fr release/*
+	rm -fr $(TARGET)

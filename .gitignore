@@ -11,3 +11,11 @@
 *.lai
 *.la
 *.a
+
+debug/
+release/
+cube
+*.old
+
+examples.cxx
+gitfilter.sh
