@@ -1,3 +1,6 @@
+#ifndef GPIO_ACCESS_H
+#define GPIO_ACCESS_H
+
 /***
  * Class which provides GPIO access via direct memory mapping.
  ***/
@@ -41,3 +44,4 @@ class GPIO_Access {
      void initGpioAccess();    
 };
 
+#endif // GPIO_ACCESS_H
