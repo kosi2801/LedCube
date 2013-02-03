@@ -13,6 +13,7 @@
 #include "Timing.h"
 #include "AnimationCubePulse.h"
 #include "AnimationRunningLight.h"
+#include "AnimationPause.h"
 
 
 using namespace std;
@@ -131,7 +132,7 @@ int main(int argc, char **argv)
         gettimeofday(&current_time, 0);
         if(current_time.tv_sec > last_second.tv_sec) {
             mvprintw(0,0,"%d Hz in the last second", count-last_count);
-            mvprintw(8,0,"Current animation: %s", animation->getAnimationName());
+            mvprintw(8,0,"Current animation: %s          ", animation->getAnimationName());
             refresh();
             
             last_second = current_time;
@@ -151,18 +152,27 @@ static void doInputCheck()
                 // no action on error
                 break;
             case ' ': 
-                // pause on SPACE
-                nodelay(stdscr, FALSE);
-                
-                getch();
-                nodelay(stdscr, TRUE);
+            {
+                // pause on/off on SPACE
+                //check if already paused by checking real class. Ugly but we're not attending a contest...
+                AnimationPause* pause = dynamic_cast<AnimationPause*>(animation);
+                if(pause != NULL) {
+                    // already paused, restore old anim and remove pause
+                    animation = pause->getPausedAnimation();
+                    delete pause;
+                } else {
+                    animation = new AnimationPause(animation);
+                }                    
                 break;
+            }
             case '1': 
                 delete animation;
                 animation = new AnimationCubePulse();
+                break;
             case '2': 
                 delete animation;
                 animation = new AnimationRunningLight();
+                break;
 
             default:
                 break;

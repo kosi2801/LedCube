@@ -2,27 +2,27 @@
 
 AnimationCubePulse::AnimationCubePulse()
 :current_brightness(0),
- current_step(20)
+ current_step(10)
 {
     ;
 }
 
 long AnimationCubePulse::getFrameMs()
 {
-    return 100L;
+    return 50L;
 }
 
-char* AnimationCubePulse::getAnimationName()
+const char* AnimationCubePulse::getAnimationName()
 {
     return "Cube Pulse";
 }
 
 void AnimationCubePulse::setNextFrame(Cube& cube)
 {
-    if(current_brightness < 20)
-        current_step = 20;
-    else if (current_brightness > 230)
-        current_step = -20;
+    if(current_brightness < 10)
+        current_step = 10;
+    else if (current_brightness > 240)
+        current_step = -10;
 
     current_brightness += current_step;
     
