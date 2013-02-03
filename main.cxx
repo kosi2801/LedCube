@@ -9,6 +9,7 @@
 
 #include "GPIO_Access.h"
 #include "Cube.h"
+#include "CubeConstants.h"
 #include "Tools.h"
 #include "Timing.h"
 #include "AnimationCubePulse.h"
@@ -45,11 +46,8 @@ int main(int argc, char **argv)
     gpio.clearPort(SD1);    
     gpio.clearPort(SD2);    
     
-    // init cube and set some voxels
+    // the cube status
     Cube cube;
-    cube.setVoxel(0,0,0,255);
-    cube.setVoxel(1,1,1,255);
-    cube.setVoxel(2,2,2,255);
     
     // required for performance measurement
     timeval current_time, last_second;    
@@ -85,7 +83,7 @@ int main(int argc, char **argv)
         }
         
         // clock out layer
-        for(int layer = 0; layer < C_LAYERS; ++layer) {            
+        for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer) {            
 //            Tools::clear_cube(gpio);
             
             // LE off

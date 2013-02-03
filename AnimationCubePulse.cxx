@@ -1,4 +1,5 @@
 #include "AnimationCubePulse.h"
+#include "CubeConstants.h"
 
 AnimationCubePulse::AnimationCubePulse()
 :current_brightness(0),
@@ -26,8 +27,8 @@ void AnimationCubePulse::setNextFrame(Cube& cube)
 
     current_brightness += current_step;
     
-    for(int x=0; x<3; ++x)
-        for(int y=0; y<3; ++y)
-            for(int z=0; z<3; ++z)
+    for(int x=0; x<CUBE_SIZE_X; ++x)
+        for(int y=0; y<CUBE_SIZE_Y; ++y)
+            for(int z=0; z<CUBE_SIZE_LAYERS; ++z)
                 cube.setVoxel(x, y, z, current_brightness);
 }

@@ -13,7 +13,7 @@ class AnimationPause : public Animation
         virtual const char* getAnimationName();
         virtual void setNextFrame(Cube& cube);
         Animation* getPausedAnimation();
-        void setPausedAnimation();
+        void setPausedAnimation(Animation* animation);
         
     private:
         Animation* pausedAnimation;

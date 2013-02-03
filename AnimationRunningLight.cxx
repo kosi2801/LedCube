@@ -1,4 +1,5 @@
 #include "AnimationRunningLight.h"
+#include "CubeConstants.h"
 
 AnimationRunningLight::AnimationRunningLight()
 :current_x(0),
@@ -24,17 +25,17 @@ void AnimationRunningLight::setNextFrame(Cube& cube)
     
     ++current_x;
     
-    if(current_x > 2) {
+    if(current_x >= CUBE_SIZE_X) {
         ++current_y;
         current_x = 0;
     }
     
-    if(current_y > 2) {
+    if(current_y >= CUBE_SIZE_Y) {
         ++current_z;
         current_y = 0;
     }
     
-    if(current_z > 2) {
+    if(current_z >= CUBE_SIZE_LAYERS) {
         current_z = 0;
     }
     

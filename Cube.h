@@ -1,17 +1,7 @@
 #ifndef CUBE_H
 #define CUBE_H
 
-#define C_LAYERS 3
-#define C_X      3
-#define C_Y      3
-
-#define CLK   GPIO_0
-#define LATCH GPIO_1
-#define SD1   GPIO_7
-#define SD2   GPIO_8
-
-typedef unsigned char uchar;
-typedef unsigned int uint;
+#include "CubeConstants.h"
 
 class Cube {
     public:
@@ -29,7 +19,7 @@ class Cube {
     private:
      const uchar getBamBitForPosition(const uchar x);
      
-     uchar cube_status[C_LAYERS][C_Y][C_X];
+     uchar cube_status[CUBE_SIZE_LAYERS][CUBE_SIZE_Y][CUBE_SIZE_X];
 };
 
 #endif // CUBE_H

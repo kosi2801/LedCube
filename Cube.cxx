@@ -2,11 +2,12 @@
 #include <ncurses.h>
 
 #include "Cube.h"
+#include "CubeConstants.h"
 
 Cube::Cube() {
-    for(int layer = 0; layer < C_LAYERS; ++layer)
-        for(int y = 0; y < C_Y; ++y)
-            for(int x = 0; x < C_X; ++x)
+    for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer)
+        for(int y = 0; y < CUBE_SIZE_Y; ++y)
+            for(int x = 0; x < CUBE_SIZE_X; ++x)
                 cube_status[layer][y][x] = 0;
 }
 
@@ -23,9 +24,9 @@ uchar Cube::getVoxel(int x, int y, int layer) {
 }
 
 void Cube::clear() {
-    for(int layer = 0; layer < C_LAYERS; ++layer)
-        for(int y = 0; y < C_Y; ++y)
-            for(int x = 0; x < C_X; ++x)
+    for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer)
+        for(int y = 0; y < CUBE_SIZE_Y; ++y)
+            for(int x = 0; x < CUBE_SIZE_X; ++x)
                 cube_status[layer][y][x] = 0;
 }
     
@@ -47,9 +48,9 @@ void Cube::printStatus() {
 
 uint Cube::getLayerBitfield(int layer) {
     uint result = 0;
-    for(int y = 0; y < C_Y; ++y)
-        for(int x = 0; x < C_X; ++x)
-            result |= (cube_status[layer][y][x]?1:0) << ((y*C_X) + x);
+    for(int y = 0; y < CUBE_SIZE_Y; ++y)
+        for(int x = 0; x < CUBE_SIZE_X; ++x)
+            result |= (cube_status[layer][y][x]?1:0) << ((y*CUBE_SIZE_X) + x);
 
     return result;
 }
@@ -57,9 +58,9 @@ uint Cube::getLayerBitfield(int layer) {
 uint Cube::getLayerBamBitfield(int layer, uchar bamPosition) {
     uint result = 0;
     unsigned char currentBamBit = getBamBitForPosition(bamPosition);
-    for(int y = 0; y < C_Y; ++y)
-        for(int x = 0; x < C_X; ++x)
-            result |= ((cube_status[layer][y][x] & currentBamBit)?1:0) << ((y*C_X) + x);
+    for(int y = 0; y < CUBE_SIZE_Y; ++y)
+        for(int x = 0; x < CUBE_SIZE_X; ++x)
+            result |= ((cube_status[layer][y][x] & currentBamBit)?1:0) << ((y*CUBE_SIZE_X) + x);
 
     return result;
 }
