@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "AnimationCubePulse.h"
 
 AnimationCubePulse::AnimationCubePulse()
@@ -13,6 +12,11 @@ long AnimationCubePulse::getFrameMs()
     return 100L;
 }
 
+char* AnimationCubePulse::getAnimationName()
+{
+    return "Cube Pulse";
+}
+
 void AnimationCubePulse::setNextFrame(Cube& cube)
 {
     if(current_brightness < 20)
@@ -21,8 +25,6 @@ void AnimationCubePulse::setNextFrame(Cube& cube)
         current_step = -20;
 
     current_brightness += current_step;
-    //printf("New brightness: %ld\n\r", current_brightness);
-
     
     for(int x=0; x<3; ++x)
         for(int y=0; y<3; ++y)

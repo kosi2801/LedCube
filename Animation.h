@@ -7,6 +7,7 @@ class Animation
 {
     public:
         virtual long getFrameMs() = 0;
+        virtual char* getAnimationName() = 0;
         virtual void setNextFrame(Cube& cube) = 0;
 };
 

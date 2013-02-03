@@ -3,8 +3,8 @@ CFLAGS=-funroll-loops -flto -O3 -lncurses
 
 all: cube
 
-cube: main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o
-	g++ $(CFLAGS) main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o -o cube 
+cube: main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o	AnimationRunningLight.o
+	g++ $(CFLAGS) main.o GPIO_Access.o Cube.o Tools.o Timing.o AnimationCubePulse.o AnimationRunningLight.o -o cube 
 
 main.o: main.cxx
 	g++ $(CFLAGS) -c main.cxx
@@ -23,6 +23,9 @@ Timing.o: Timing.cxx Timing.h
 
 AnimationCubePulse.o: AnimationCubePulse.cxx AnimationCubePulse.h
 	g++ $(CFLAGS) -c AnimationCubePulse.cxx
+
+AnimationRunningLight.o: AnimationRunningLight.cxx AnimationRunningLight.h
+	g++ $(CFLAGS) -c AnimationRunningLight.cxx
 
 clean:
 	rm -rf *o cube

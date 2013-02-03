@@ -12,11 +12,14 @@
 #include "Tools.h"
 #include "Timing.h"
 #include "AnimationCubePulse.h"
+#include "AnimationRunningLight.h"
+
 
 using namespace std;
 
 static void finish(int sig);
 static void doInputCheck();
+static Animation* animation;
 
 int main(int argc, char **argv)
 {
@@ -54,8 +57,8 @@ int main(int argc, char **argv)
     // initialize timing status
     timing.startCycles();
     
-    // set up Animation
-    Animation* animation = new AnimationCubePulse();
+    // set up initial Animation
+    animation = new AnimationCubePulse();
     timeval nextAnimFrame = timing.getNow();
     
     initscr();
@@ -128,6 +131,7 @@ int main(int argc, char **argv)
         gettimeofday(&current_time, 0);
         if(current_time.tv_sec > last_second.tv_sec) {
             mvprintw(0,0,"%d Hz in the last second", count-last_count);
+            mvprintw(8,0,"Current animation: %s", animation->getAnimationName());
             refresh();
             
             last_second = current_time;
@@ -153,6 +157,13 @@ static void doInputCheck()
                 getch();
                 nodelay(stdscr, TRUE);
                 break;
+            case '1': 
+                delete animation;
+                animation = new AnimationCubePulse();
+            case '2': 
+                delete animation;
+                animation = new AnimationRunningLight();
+
             default:
                 break;
         }
@@ -170,6 +181,7 @@ static void doInputCheck()
 
 static void finish(int sig)
 {
+    delete animation;
     endwin();
     exit(0);
 }

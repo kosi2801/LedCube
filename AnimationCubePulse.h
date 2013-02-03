@@ -8,6 +8,7 @@ class AnimationCubePulse : public Animation
     public:
         AnimationCubePulse();
         virtual long getFrameMs();
+        virtual char* getAnimationName();
         virtual void setNextFrame(Cube& cube);
         
     private:
