@@ -12,6 +12,9 @@ class Timing
         void setTargetHz(long new_target_hz);
         void startCycles();
         void waitForNextCycle();
+        timeval getNow();
+        timeval getFutureTime(long ms_from_now);
+        bool isTimeReached(timeval& target_time);
         
     private:        
         long target_hz;

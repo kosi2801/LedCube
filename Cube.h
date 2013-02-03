@@ -19,6 +19,7 @@ class Cube {
      ~Cube();
      void setVoxel(int x, int y, int layer, uchar value);
      uchar getVoxel(int x, int y, int layer);
+     void printStatus();
      
      uint getLayerBitfield(int layer);
      uint getLayerBamBitfield(int layer, unsigned char bamPosition);

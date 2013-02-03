@@ -41,3 +41,46 @@ void Timing::waitForNextCycle()
     // and wait until time's for next layer
     Tools::wait_until(time_base, time_offset);
 }
+
+timeval Timing::getFutureTime(const long ms_from_now)
+{
+    struct timeval target;
+    
+    gettimeofday(&target, 0);
+
+    // calculate future time
+    target.tv_sec += (ms_from_now/1000L);
+    target.tv_usec += ((ms_from_now%1000L)*1000L);
+    if(target.tv_usec > 1000000L) 
+    {
+        ++target.tv_sec;
+        target.tv_usec -= 1000000L;
+    }
+    
+    return target;
+}
+
+timeval Timing::getNow()
+{
+    struct timeval now;
+    
+    gettimeofday(&now, 0);
+    
+    return now;
+}
+
+bool Timing::isTimeReached(timeval& target_time)
+{
+    struct timeval now;    
+    gettimeofday(&now, 0);
+    
+    if(now.tv_sec > target_time.tv_sec)
+        return true;
+    if(now.tv_sec < target_time.tv_sec)
+        return false;        
+    if(now.tv_usec < target_time.tv_usec)
+        return false;
+    return true;
+        
+}
+

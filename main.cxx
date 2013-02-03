@@ -4,12 +4,19 @@
 #include <iostream>
 #include <sys/time.h>
 
+#include <ncurses.h>
+#include <signal.h>
+
 #include "GPIO_Access.h"
 #include "Cube.h"
 #include "Tools.h"
 #include "Timing.h"
+#include "AnimationCubePulse.h"
 
 using namespace std;
+
+static void finish(int sig);
+static void doInputCheck();
 
 int main(int argc, char **argv)
 {
@@ -39,12 +46,6 @@ int main(int argc, char **argv)
     cube.setVoxel(0,0,0,255);
     cube.setVoxel(1,1,1,255);
     cube.setVoxel(2,2,2,255);
-
-/*    for(int x=0; x<3; ++x)
-        for(int y=0; y<3; ++y)
-            for(int z=0; z<3; ++z)
-                cube.setVoxel(x, y, z, (9*x)+(9*3*y)+(9*3*3*z)+1);
-    */
     
     // required for performance measurement
     timeval current_time, last_second;    
@@ -53,7 +54,32 @@ int main(int argc, char **argv)
     // initialize timing status
     timing.startCycles();
     
+    // set up Animation
+    Animation* animation = new AnimationCubePulse();
+    timeval nextAnimFrame = timing.getNow();
+    
+    initscr();
+    signal(SIGINT, finish);
+    nodelay(stdscr, TRUE);
+    cbreak();
+    noecho();
+    clear();
+    keypad(stdscr, TRUE);
+    
     for(int count=0;;++count) {        
+        // get next animation step if due
+        if(timing.isTimeReached(nextAnimFrame))
+        {
+            //printf("Time reached \n\r");
+            nextAnimFrame = timing.getFutureTime(animation->getFrameMs());
+            animation->setNextFrame(cube);
+            
+            cube.printStatus();
+            refresh();
+            
+            doInputCheck();;
+        }
+        
         // clock out layer
         for(int layer = 0; layer < C_LAYERS; ++layer) {            
 //            Tools::clear_cube(gpio);
@@ -94,18 +120,56 @@ int main(int argc, char **argv)
             // LE on
             gpio.setPort(LATCH);
             
-            // delay until next period
+            // delay until next period in next layer
             timing.waitForNextCycle();
         }
         
         // performance measurement
         gettimeofday(&current_time, 0);
         if(current_time.tv_sec > last_second.tv_sec) {
-            printf("%d Hz in the last second \r\n", count-last_count);
-             
+            mvprintw(0,0,"%d Hz in the last second", count-last_count);
+            refresh();
+            
             last_second = current_time;
-            last_count = count;
-        }
-        
+            last_count = count;            
+        }                
     }
+    
+    finish(0);
 } 
+
+static void doInputCheck()
+{
+        // check for keyboard input
+        int ch = getch();
+        switch (ch) {
+            case ERR:
+                // no action on error
+                break;
+            case ' ': 
+                // pause on SPACE
+                nodelay(stdscr, FALSE);
+                
+                getch();
+                nodelay(stdscr, TRUE);
+                break;
+            default:
+                break;
+        }
+        if (ch == ERR) {
+            ; // nothing
+        } else {
+            switch (ch) {
+                case KEY_ENTER: 
+                    finish(0);
+                    break;
+            }
+        }
+
+}
+
+static void finish(int sig)
+{
+    endwin();
+    exit(0);
+}

@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <ncurses.h>
+
 #include "Cube.h"
 
 Cube::Cube() {
@@ -17,6 +20,22 @@ void Cube::setVoxel(int x, int y, int layer, uchar value) {
 
 uchar Cube::getVoxel(int x, int y, int layer) {
     return cube_status[layer][y][x];
+}
+
+void Cube::printStatus() {
+    mvprintw(2,0,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d", 
+        cube_status[0][0][0], cube_status[0][0][1], cube_status[0][0][2], 
+        cube_status[1][0][0], cube_status[1][0][1], cube_status[1][0][2], 
+        cube_status[2][0][0], cube_status[1][0][1], cube_status[2][0][2]);
+    mvprintw(4,0,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d", 
+        cube_status[0][1][0], cube_status[0][1][1], cube_status[0][1][2], 
+        cube_status[1][1][0], cube_status[1][1][1], cube_status[1][1][2], 
+        cube_status[2][1][0], cube_status[1][1][1], cube_status[2][1][2]);
+    mvprintw(6,0,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d", 
+        cube_status[0][2][0], cube_status[0][2][1], cube_status[0][2][2], 
+        cube_status[1][2][0], cube_status[1][2][1], cube_status[1][2][2], 
+        cube_status[2][2][0], cube_status[1][2][1], cube_status[2][2][2]);
+        
 }
 
 uint Cube::getLayerBitfield(int layer) {
