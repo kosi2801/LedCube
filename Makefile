@@ -13,7 +13,7 @@ endif
 
 CC = g++
 CFLAGS = -Wall -lncurses
-DEFINES = -DMY_SYMBOL
+DEFINES = 
 INCPATH = -Iinclude/
 
 ifeq ($(BC),debug)

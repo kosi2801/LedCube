@@ -146,6 +146,7 @@ static void doInputCheck()
 {
         // check for keyboard input
         int ch = getch();
+        flushinp();
         switch (ch) {
             case ERR:
                 // no action on error
@@ -165,26 +166,19 @@ static void doInputCheck()
                 }                    
                 break;
             }
-            case '1': 
+            case KEY_F(1): 
                 delete animation;
                 animation = new AnimationCubePulse();
                 break;
-            case '2': 
+            case KEY_F(2): 
                 delete animation;
                 animation = new AnimationRunningLight();
                 break;
 
             default:
+                // send to animation
+                animation->handleKeyPress(ch);
                 break;
-        }
-        if (ch == ERR) {
-            ; // nothing
-        } else {
-            switch (ch) {
-                case KEY_ENTER: 
-                    finish(0);
-                    break;
-            }
         }
 }
 
