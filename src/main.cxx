@@ -14,6 +14,7 @@
 #include "Timing.h"
 #include "AnimationCubePulse.h"
 #include "AnimationRunningLight.h"
+#include "AnimationSpotControl.h"
 #include "AnimationPause.h"
 
 
@@ -173,6 +174,10 @@ static void doInputCheck()
             case KEY_F(2): 
                 delete animation;
                 animation = new AnimationRunningLight();
+                break;
+            case KEY_F(3): 
+                delete animation;
+                animation = new AnimationSpotControl();
                 break;
 
             default:
