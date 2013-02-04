@@ -50,7 +50,8 @@ int main(int argc, char **argv)
     Cube cube;
     
     // required for performance measurement
-    timeval current_time, last_second;    
+    timeval current_time, last_second;
+    gettimeofday(&last_second, 0);
     int last_count = 0;
     
     // initialize timing status

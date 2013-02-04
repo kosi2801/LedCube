@@ -1,6 +1,12 @@
 SHELL = /bin/bash
 TARGET = cube
 
+ifneq ($(MAKECMDGOALS),release)
+	BC=debug
+else
+	BC=release
+endif
+
 ifndef BC
 	BC=debug
 endif
@@ -28,6 +34,10 @@ OBJS = $(patsubst %,$(OBJDIR)/%,$(OTMP))
 
 # Build a list of dependency files
 DEPS = $(patsubst %.o,$(DEPDIR)/%.d,$(OTMP))
+
+debug: all
+
+release: all
 
 all: init $(OBJS)
 	$(CC) $(DEFINES) $(CFLAGS) -o $(TARGET) $(OBJS)
