@@ -9,6 +9,9 @@ class Timing
         Timing(long target_hz = 5000L);
         ~Timing();
         
+        static void wait_usecs(const int delay_micros);
+        static void wait_until(const timeval& time_base, long offset_micros);
+
         void setTargetHz(long new_target_hz);
         void startCycles();
         void waitForNextCycle();
