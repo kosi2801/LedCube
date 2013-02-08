@@ -3,10 +3,8 @@
 #include <iostream>
 #include <sys/time.h>
 
-#include <ncurses.h>
-#include <signal.h>
-
 #include "Main.h"
+#include "UI.h"
 #include "GPIO_Access.h"
 #include "Cube.h"
 #include "CubeConstants.h"
@@ -26,13 +24,7 @@ int Main::exitCode = 0;
 Main::Main() {
     animation = NULL;
 
-    initscr();
-    signal(SIGINT, finish);
-    nodelay(stdscr, TRUE);
-    cbreak();
-    noecho();
-    clear();
-    keypad(stdscr, TRUE);
+    UI::init();
 }
 
 bool Main::isFinished() {
@@ -43,7 +35,7 @@ Main::~Main() {
     if(animation != NULL)
         delete animation;
 
-    endwin();
+    UI::shutdown();
 }
 
 int Main::run(int argc, char **argv) {
@@ -91,8 +83,7 @@ int Main::run(int argc, char **argv) {
             nextAnimFrame = timing.getFutureTime(animation->getFrameMs());
             animation->setNextFrame(cube);
             
-            cube.printStatus();
-            refresh();
+            UI::refreshCube(cube);
             
             doInputCheck();;
         }
@@ -144,9 +135,9 @@ int Main::run(int argc, char **argv) {
         // performance measurement
         gettimeofday(&current_time, 0);
         if(current_time.tv_sec > last_second.tv_sec) {
-            mvprintw(0,0,"%d Hz in the last second", count-last_count);
-            mvprintw(8,0,"Current animation: %s          ", animation->getAnimationName());
-            refresh();
+            UI::setStatusHz(count-last_count);
+            UI::setStatusAnimationName(animation->getAnimationName());
+            UI::refreshStatus();
             
             last_second = current_time;
             last_count = count;            
@@ -163,8 +154,7 @@ void Main::finish(int sig) {
 
 void Main::doInputCheck() {
     // check for keyboard input
-    int ch = getch();
-    flushinp();
+    int ch = UI::getKey();
     switch (ch) {
         case ERR:
             // no action on error
