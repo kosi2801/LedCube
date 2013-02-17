@@ -21,6 +21,7 @@ class UI {
         // different status sections
         static void setStatusHz(int hz);
         static void setStatusAnimationName(const char* animationName);
+        static void addStatusMessage(const char* message);
         
     private:
         static int currentHz;

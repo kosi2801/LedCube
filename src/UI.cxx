@@ -28,6 +28,8 @@ void UI::init() {
     UI::statusWindow = newwin(4,60,0,0);
     UI::cubeWindow = newwin(20, 60, 6, 0);
     UI::messageWindow = newwin(20, 60, 30, 0);
+    
+    scrollok(UI::messageWindow, true);
 }
 
 void UI::shutdown() {
@@ -44,6 +46,11 @@ void UI::setStatusHz(int hz) {
 
 void UI::setStatusAnimationName(const char* animationName) {
     currentAnimationName = animationName;
+}
+
+void UI::addStatusMessage(const char* message) {
+    wprintw(messageWindow, "%s\n", message);
+    wrefresh(messageWindow);
 }
 
 void UI::refreshStatus() {
