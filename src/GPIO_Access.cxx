@@ -2,10 +2,13 @@
 #define GPIO_BASE (BCM2708_PERI_BASE + 0x200000) /* GPIO controller */
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <errno.h>
+#include <cstring>
 
 #include "GPIO_Access.h"
 
@@ -53,7 +56,8 @@ void GPIO_Access::clearPort(GPIO_Port port)
 void GPIO_Access::initGpioAccess()
 {
     int  mem_fd;
-    char *gpio_map;
+    //char *gpio_map;
+    volatile uint32_t *gpio_map;
     
    /* open /dev/mem */
    if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
@@ -62,7 +66,7 @@ void GPIO_Access::initGpioAccess()
    }
 
    /* mmap GPIO */
-   gpio_map = (char *)mmap(
+   gpio_map = (volatile uint32_t *)mmap(
       NULL,             //Any adddress in our space will do
       BLOCK_SIZE,       //Map length
       PROT_READ|PROT_WRITE,// Enable reading & writting to mapped memory
@@ -73,8 +77,8 @@ void GPIO_Access::initGpioAccess()
 
    close(mem_fd); //No need to keep mem_fd open after mmap
 
-   if ((long)gpio_map < 0) {
-      printf("mmap error %d\n", (int)gpio_map);
+   if (gpio_map == MAP_FAILED) {
+      printf("mmap error: %s\n", strerror(errno));
       exit(-1);
    }
 
