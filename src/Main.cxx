@@ -15,6 +15,7 @@
 #include "AnimationSpotControl.h"
 #include "AnimationPause.h"
 #include "AnimationRandomPulse.h"
+#include "AnimationMovingWall.h"
 
 using namespace std;
 
@@ -46,6 +47,8 @@ int Main::run(int argc, char **argv) {
         target_hz = atol(argv[1]);
     }
     
+    bool lowHzMode = (target_hz < 256);
+    
     Timing timing(target_hz);
     GPIO_Access gpio;
     
@@ -73,13 +76,12 @@ int Main::run(int argc, char **argv) {
     
     // set up initial Animation
     animation = new AnimationCubePulse();
-    timeval nextAnimFrame = timing.getNow();
+    uint64_t nextAnimFrame = timing.getNow();
         
     for(int count=0;isFinished() != true;++count) {        
         // get next animation step if due
         if(timing.isTimeReached(nextAnimFrame))
         {
-            //printf("Time reached \n\r");
             nextAnimFrame = timing.getFutureTime(animation->getFrameMs());
             animation->setNextFrame(cube);
             
@@ -88,9 +90,14 @@ int Main::run(int argc, char **argv) {
             doInputCheck();;
         }
         
+        // refresh LED cache for next refresh
+        if(!lowHzMode) 
+            cube.refreshCubeForBamPosition(count%256);
+        
         // clock out layer
+        long usIdle = 0;
         for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer) {            
-//            Tools::clear_cube(gpio);
+            Tools::clear_cube(gpio);
             
             // LE off
             gpio.clearPort(LATCH);
@@ -111,25 +118,25 @@ int Main::run(int argc, char **argv) {
             Tools::clock_it(gpio);
 
             // 9 cube pins
-            // if target Hz>255 enable BAM
-            uint cube_bits;
-            if(target_hz > 255)
-            {
-                cube_bits = cube.getLayerBamBitfield(layer, count%256);
-            } else {
-                cube_bits = cube.getLayerBitfield(layer);
-            }
-            
-            for(int i=0; i<9; ++i) {
-                (cube_bits & (1<<i)) ? gpio.setPort(SD1) : gpio.clearPort(SD1);
-                Tools::clock_it(gpio);
+            // if target Hz>255 enable BAM            
+            for(int y = 0; y < CUBE_SIZE_Y; ++y) {
+                for(int x = 0; x < CUBE_SIZE_X; ++x) {
+                    if(lowHzMode)
+                        cube.getVoxel(x, y, layer)?gpio.setPort(SD1) : gpio.clearPort(SD1);                    
+                    else
+                        cube.getVoxelStatus(x, y, layer)?gpio.setPort(SD1) : gpio.clearPort(SD1);
+                    Tools::clock_it(gpio);
+                }
             }
             
             // LE on
             gpio.setPort(LATCH);
             
             // delay until next period in next layer
-            timing.waitForNextCycle();
+            usIdle += timing.waitForNextCycle();
+
+	    // clear Cube after each layer was displayed
+            Tools::clear_cube(gpio);
         }
         
         // performance measurement
@@ -138,6 +145,10 @@ int Main::run(int argc, char **argv) {
             UI::setStatusHz(count-last_count);
             UI::setStatusAnimationName(animation->getAnimationName());
             UI::refreshStatus();
+            
+            char message[200];
+            sprintf(message, "%ld uSec idle in last frame", usIdle);
+            UI::addStatusMessage(message);
             
             last_second = current_time;
             last_count = count;            
@@ -189,6 +200,10 @@ void Main::doInputCheck() {
         case KEY_F(4): 
             delete animation;
             animation = new AnimationRandomPulse();
+            break;
+        case KEY_F(5): 
+            delete animation;
+            animation = new AnimationMovingWall();
             break;
 
         default:

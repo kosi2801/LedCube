@@ -1,7 +1,11 @@
 #include <stdio.h>
+#include <sched.h>
+#include <time.h>
 #include "Timing.h"
 #include "Tools.h"
 #include "Cube.h"
+
+GPIO_Access Timing::gpio;
 
 Timing::Timing(long target_hz)
 :target_hz(target_hz)
@@ -14,46 +18,38 @@ Timing::~Timing()
     ;
 }
 
-void Timing::wait_usecs(const int delay_micros)
+void Timing::wait_usecs(const uint64_t delay_micros)
 {
-    int micros = 0;
-    struct timeval pulse, now;
-
-    // wait until number of usecs to wait for have passed
-    gettimeofday(&pulse, 0);    
-    while(micros < delay_micros)
+    uint64_t start, target;
+    
+    start = gpio.getSystemTimer();
+    
+    // Calling nanosleep() takes at least 100-200us, so use it for
+    // long waits and use a busy wait on the System Timer for the rest.
+    if (delay_micros > 450)
     {
-        gettimeofday(&now, 0);
-        micros = (now.tv_sec - pulse.tv_sec) * 1000000L;
-        micros = micros + (now.tv_usec - pulse.tv_usec);        
+        struct timespec t1;
+        t1.tv_sec = 0;
+        t1.tv_nsec = 1000 * (long)(delay_micros - 200);
+        nanosleep(&t1, NULL);
     }
     
-    return;
+    target = start + delay_micros;
+
+    
+    while(gpio.getSystemTimer() < target) 
+    ;
 }
 
-void Timing::wait_until(const timeval& time_base, long offset_micros)
+long Timing::wait_until(const uint64_t time_base, uint64_t offset_micros)
 {
-    struct timeval now, target;
+    uint64_t now = gpio.getSystemTimer();
+    uint64_t target = time_base + offset_micros;
     
-    // calculate time to wait for
-    target.tv_sec = time_base.tv_sec + (offset_micros/1000000L);
-    target.tv_usec = time_base.tv_usec + (offset_micros%1000000L);
-    if(target.tv_usec > 1000000L) 
-    {
-        ++target.tv_sec;
-        target.tv_usec -= 1000000L;
-    }
-    
-    // wait for correct second
-    gettimeofday(&now, 0);
-    while(now.tv_sec < target.tv_sec)
-        gettimeofday(&now, 0);
-    
-    // wait for corrent microsecond
-    while((now.tv_usec < target.tv_usec) && (now.tv_sec == target.tv_sec))
-        gettimeofday(&now, 0);
+    if(now<target)
+        wait_usecs(target - now);
         
-    return;
+    return target-now;
 }
 
 void Timing::setTargetHz(long new_target_hz)
@@ -69,60 +65,30 @@ void Timing::setTargetHz(long new_target_hz)
 
 void Timing::startCycles()
 {
-    gettimeofday(&time_base, 0);
+    time_base = gpio.getSystemTimer();
 }
 
-void Timing::waitForNextCycle()
+long Timing::waitForNextCycle()
 {
-    // calculate time of next frame, re-sync regularly
-//            if(time_offset > 10000000L) {
-//                gettimeofday(&time_base, 0);
-//                time_offset -= 10000000L;
-//            }
+    // calculate time of next frame
     time_offset += time_slice;
+    
     // and wait until time's for next layer
-    Timing::wait_until(time_base, time_offset);
+    return Timing::wait_until(time_base, time_offset);
 }
 
-timeval Timing::getFutureTime(const long ms_from_now)
+uint64_t Timing::getFutureTime(const long ms_from_now)
 {
-    struct timeval target;
-    
-    gettimeofday(&target, 0);
-
-    // calculate future time
-    target.tv_sec += (ms_from_now/1000L);
-    target.tv_usec += ((ms_from_now%1000L)*1000L);
-    if(target.tv_usec > 1000000L) 
-    {
-        ++target.tv_sec;
-        target.tv_usec -= 1000000L;
-    }
-    
-    return target;
+    return gpio.getSystemTimer() + (ms_from_now * 1000L);
 }
 
-timeval Timing::getNow()
+uint64_t Timing::getNow()
 {
-    struct timeval now;
-    
-    gettimeofday(&now, 0);
-    
-    return now;
+    return gpio.getSystemTimer();
 }
 
-bool Timing::isTimeReached(timeval& target_time)
+bool Timing::isTimeReached(uint64_t target_time)
 {
-    struct timeval now;    
-    gettimeofday(&now, 0);
-    
-    if(now.tv_sec > target_time.tv_sec)
-        return true;
-    if(now.tv_sec < target_time.tv_sec)
-        return false;        
-    if(now.tv_usec < target_time.tv_usec)
-        return false;
-    return true;
-        
+    return (target_time <= gpio.getSystemTimer());
 }
 

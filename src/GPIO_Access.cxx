@@ -1,8 +1,8 @@
-#define BCM2708_PERI_BASE 0x20000000
-#define GPIO_BASE (BCM2708_PERI_BASE + 0x200000) /* GPIO controller */
+#define BCM2835_PERI_BASE 0x20000000
+#define GPIO_BASE (BCM2835_PERI_BASE + 0x200000) /* GPIO controller */
+#define ST_BASE (BCM2835_PERI_BASE + 0x3000) /* System timer */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -22,6 +22,9 @@
 
 #define GPIO_SET *(gpio+7)  // sets   bits which are 1 ignores bits which are 0
 #define GPIO_CLR *(gpio+10) // clears bits which are 1 ignores bits which are 0
+
+#define ST_CLO *(st+1)  // lower 32 bits of running system timer    10^6 = 1sec
+#define ST_CHI *(st+2)  // higher 32 bits of running system timer
 
 GPIO_Access::GPIO_Access()
 {
@@ -53,11 +56,18 @@ void GPIO_Access::clearPort(GPIO_Port port)
     GPIO_CLR = 1 << port;
 }
 
+uint64_t GPIO_Access::getSystemTimer()
+{
+    uint64_t stime = ST_CHI;
+    stime <<= 32;
+    stime += ST_CLO;
+    return stime;
+}
+
 void GPIO_Access::initGpioAccess()
 {
     int  mem_fd;
-    //char *gpio_map;
-    volatile uint32_t *gpio_map;
+    volatile uint32_t *mem_map;
     
    /* open /dev/mem */
    if ((mem_fd = open("/dev/mem", O_RDWR|O_SYNC) ) < 0) {
@@ -66,7 +76,7 @@ void GPIO_Access::initGpioAccess()
    }
 
    /* mmap GPIO */
-   gpio_map = (volatile uint32_t *)mmap(
+   mem_map = (volatile uint32_t *)mmap(
       NULL,             //Any adddress in our space will do
       BLOCK_SIZE,       //Map length
       PROT_READ|PROT_WRITE,// Enable reading & writting to mapped memory
@@ -75,14 +85,32 @@ void GPIO_Access::initGpioAccess()
       GPIO_BASE         //Offset to GPIO peripheral
    );
 
-   close(mem_fd); //No need to keep mem_fd open after mmap
-
-   if (gpio_map == MAP_FAILED) {
-      printf("mmap error: %s\n", strerror(errno));
+   if (mem_map == MAP_FAILED) {
+      printf("mmap gpio error: %s\n", strerror(errno));
       exit(-1);
    }
 
    // Always use volatile pointer!
-   gpio = (volatile unsigned *)gpio_map;
+   gpio = (volatile uint32_t *)mem_map;
+   
+   /* mmap System Timer */
+   mem_map = (volatile uint32_t *)mmap(
+      NULL,             //Any adddress in our space will do
+      BLOCK_SIZE,       //Map length
+      PROT_READ,// Only reading from mapped memory
+      MAP_SHARED,       //Shared with other processes
+      mem_fd,           //File to map
+      ST_BASE         //Offset to System Timer peripheral
+   );
+
+   if (mem_map == MAP_FAILED) {
+      printf("mmap st error: %s\n", strerror(errno));
+      exit(-1);
+   }
+
+   // Always use volatile pointer!
+   st = (volatile uint32_t *)mem_map;
+   
+   close(mem_fd); //No need to keep mem_fd open after mmap
 }
 

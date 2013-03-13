@@ -1,6 +1,8 @@
 #ifndef GPIO_ACCESS_H
 #define GPIO_ACCESS_H
 
+#include <stdint.h>
+
 /***
  * Class which provides GPIO access via direct memory mapping.
  ***/
@@ -38,9 +40,12 @@ class GPIO_Access {
      void setMode(GPIO_Port port, GPIO_Mode mode);
      void setPort(GPIO_Port port);
      void clearPort(GPIO_Port port);
+     
+     uint64_t getSystemTimer();
 
     private:
-     volatile unsigned *gpio;
+     volatile uint32_t *gpio;
+     volatile uint32_t *st;
      void initGpioAccess();    
 };
 

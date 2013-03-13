@@ -13,13 +13,16 @@ class Cube {
      void printStatus();
      
      const uint getLayerBitfield(int layer) const;
-     const uint getLayerBamBitfield(int layer, unsigned char bamPosition) const;
+     
+     void refreshCubeForBamPosition(uchar bamPosition);
+     const bool getVoxelStatus(int x, int y, int layer) const;
      
     
     private:
      const uchar getBamBitForPosition(const uchar x) const;
      
      uchar cube_status[CUBE_SIZE_LAYERS][CUBE_SIZE_Y][CUBE_SIZE_X];
+     bool cube_cache[CUBE_SIZE_LAYERS][CUBE_SIZE_Y][CUBE_SIZE_X];
 };
 
 #endif // CUBE_H

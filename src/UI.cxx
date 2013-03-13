@@ -74,16 +74,17 @@ void UI::refreshCube(const Cube& cube) {
     wmove(cubeWindow, 0, 0);
     
     wprintw(cubeWindow,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d\n\n", 
-        cube.getVoxel(0, 0, 0), cube.getVoxel(0, 0, 1), cube.getVoxel(0, 0, 2), 
-        cube.getVoxel(1, 0, 0), cube.getVoxel(1, 0, 1), cube.getVoxel(1, 0, 2), 
-        cube.getVoxel(2, 0, 0), cube.getVoxel(2, 0, 1), cube.getVoxel(2, 0, 2));
+        cube.getVoxel(0, 2, 0), cube.getVoxel(1, 2, 0), cube.getVoxel(2, 2, 0), 
+        cube.getVoxel(0, 2, 1), cube.getVoxel(1, 2, 1), cube.getVoxel(2, 2, 1), 
+        cube.getVoxel(0, 2, 2), cube.getVoxel(1, 2, 2), cube.getVoxel(2, 2, 2));
     wprintw(cubeWindow,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d\n\n", 
-        cube.getVoxel(0, 1, 0), cube.getVoxel(0, 1, 1), cube.getVoxel(0, 1, 2), 
-        cube.getVoxel(1, 1, 0), cube.getVoxel(1, 1, 1), cube.getVoxel(1, 1, 2), 
-        cube.getVoxel(2, 1, 0), cube.getVoxel(2, 1, 1), cube.getVoxel(2, 1, 2));
-    wprintw(cubeWindow,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d", 
-        cube.getVoxel(0, 2, 0), cube.getVoxel(0, 2, 1), cube.getVoxel(0, 2, 2), 
-        cube.getVoxel(1, 2, 0), cube.getVoxel(1, 2, 1), cube.getVoxel(1, 2, 2), 
-        cube.getVoxel(2, 2, 0), cube.getVoxel(2, 2, 1), cube.getVoxel(2, 2, 2));
+        cube.getVoxel(0, 1, 0), cube.getVoxel(1, 1, 0), cube.getVoxel(2, 1, 0), 
+        cube.getVoxel(0, 1, 1), cube.getVoxel(1, 1, 1), cube.getVoxel(2, 1, 1), 
+        cube.getVoxel(0, 1, 2), cube.getVoxel(1, 1, 2), cube.getVoxel(2, 1, 2));
+    wprintw(cubeWindow,"%3d %3d %3d   %3d %3d %3d   %3d %3d %3d\n\n", 
+        cube.getVoxel(0, 0, 0), cube.getVoxel(1, 0, 0), cube.getVoxel(2, 0, 0), 
+        cube.getVoxel(0, 0, 1), cube.getVoxel(1, 0, 1), cube.getVoxel(2, 0, 1), 
+        cube.getVoxel(0, 0, 2), cube.getVoxel(1, 0, 2), cube.getVoxel(2, 0, 2));
+
     wrefresh(cubeWindow);
 }

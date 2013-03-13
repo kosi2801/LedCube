@@ -43,17 +43,58 @@ const uint Cube::getLayerBitfield(int layer) const {
     return result;
 }
 
-const uint Cube::getLayerBamBitfield(int layer, uchar bamPosition) const {
-    uint result = 0;
+void Cube::refreshCubeForBamPosition(uchar bamPosition) {
     const uchar currentBamBit = getBamBitForPosition(bamPosition);
-    for(int y = 0; y < CUBE_SIZE_Y; ++y)
-        for(int x = 0; x < CUBE_SIZE_X; ++x)
-            result |= ((cube_status[layer][y][x] & currentBamBit)?1:0) << ((y*CUBE_SIZE_X) + x);
-
-    return result;
+    
+    for(int layer=0; layer<CUBE_SIZE_LAYERS; ++layer)
+        for(int y=0; y<CUBE_SIZE_Y; ++y)
+            for(int x=0; x<CUBE_SIZE_X; ++x)
+                cube_cache[layer][y][x] = (cube_status[layer][y][x] & currentBamBit);
 }
 
+const bool Cube::getVoxelStatus(int x, int y, int layer) const {
+    return cube_cache[layer][y][x];
+}
+
+
 const uchar Cube::getBamBitForPosition(const uchar x) const {
+/*
+    static const uchar msb_lut[256] =
+        {
+              0, 1, 2, 4, 8, 16, 32, 64,
+            128, 128, 64, 128, 128, 32, 64, 128,
+            128, 64, 128, 128, 16, 32, 64, 128,
+            128, 64, 128, 128, 32, 64, 128, 128,
+             64, 128, 128, 8, 16, 32, 64, 128,
+            128, 64, 128, 128, 32, 64, 128, 128,
+             64, 128, 128, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 4, 8, 16, 32, 64, 128,
+            128, 64, 128, 128, 32, 64, 128, 128,
+             64, 128, 128, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 8, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 16, 32, 64, 128, 128, 64,
+            128, 128, 32, 64, 128, 128, 64, 128,
+            128, 2, 4, 8, 16, 32, 64, 128,
+            128, 64, 128, 128, 32, 64, 128, 128,
+             64, 128, 128, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 8, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 16, 32, 64, 128, 128, 64,
+            128, 128, 32, 64, 128, 128, 64, 128,
+            128, 4, 8, 16, 32, 64, 128, 128,
+             64, 128, 128, 32, 64, 128, 128, 64,
+            128, 128, 16, 32, 64, 128, 128, 64,
+            128, 128, 32, 64, 128, 128, 64, 128,
+            128, 8, 16, 32, 64, 128, 128, 64,
+            128, 128, 32, 64, 128, 128, 64, 128,
+            128, 16, 32, 64, 128, 128, 64, 128,
+            128, 32, 64, 128, 128, 64, 128, 128,
+        };
+/*/
     static const uchar msb_lut[256] =
         {
              0, 128,  64, 128,  32, 128,  64, 128,
@@ -89,6 +130,7 @@ const uchar Cube::getBamBitForPosition(const uchar x) const {
              8, 128,  64, 128,  32, 128,  64, 128,
             16, 128,  64, 128,  32, 128,  64, 128
         };
-
+// */
 	return msb_lut[x];
 }
+
