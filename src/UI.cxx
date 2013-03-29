@@ -9,6 +9,10 @@ WINDOW* UI::statusWindow = NULL;
 WINDOW* UI::cubeWindow = NULL;
 WINDOW* UI::messageWindow = NULL;
 
+bool UI::statusWindowActive = true;
+bool UI::cubeWindowActive = true;
+bool UI::messageWindowActive = true;
+
 void UI::init() {
     initscr();
     //signal(SIGINT, finish);
@@ -40,6 +44,18 @@ void UI::shutdown() {
     endwin();
 }
 
+void UI::setStatusWindowActive(bool active) {
+    statusWindowActive = active;
+}
+
+void UI::setCubeWindowActive(bool active) {
+    cubeWindowActive = active;
+}
+
+void UI::setMessageWindowActive(bool active) {
+    messageWindowActive = active;
+}
+
 void UI::setStatusHz(int hz) {
     currentHz = hz;
 }
@@ -49,11 +65,15 @@ void UI::setStatusAnimationName(const char* animationName) {
 }
 
 void UI::addStatusMessage(const char* message) {
+    if(!messageWindowActive) return;
+    
     wprintw(messageWindow, "%s\n", message);
     wrefresh(messageWindow);
 }
 
 void UI::refreshStatus() {
+    if(!statusWindowActive) return;
+    
     // update Status window
     wclear(statusWindow);
     wmove(statusWindow, 0, 0);
@@ -69,6 +89,8 @@ int UI::getKey() {
 }
 
 void UI::refreshCube(const Cube& cube) {
+    if(!cubeWindowActive) return;
+    
     // update Cube window
     wclear(cubeWindow);
     wmove(cubeWindow, 0, 0);

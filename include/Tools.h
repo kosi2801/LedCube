@@ -7,6 +7,7 @@ class Tools {
     public:
         static void clock_it(GPIO_Access& gpio);
         static void clear_cube(GPIO_Access& gpio);
+        static void drain_cube(GPIO_Access& gpio);
 };
 
 #endif // TOOLS_H

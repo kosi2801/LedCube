@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sys/time.h>
+#include <sched.h>
 
 #include "Main.h"
 #include "UI.h"
@@ -77,6 +78,10 @@ int Main::run(int argc, char **argv) {
     // set up initial Animation
     animation = new AnimationCubePulse();
     uint64_t nextAnimFrame = timing.getNow();
+    
+    UI::setStatusWindowActive(false);
+    UI::setCubeWindowActive(false);
+    UI::setMessageWindowActive(false);
         
     for(int count=0;isFinished() != true;++count) {        
         // get next animation step if due
@@ -96,9 +101,14 @@ int Main::run(int argc, char **argv) {
         
         // clock out layer
         long usIdle = 0;
-        for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer) {            
+        for(int layer = 0; layer < CUBE_SIZE_LAYERS; ++layer) { 
+            // delay until next period in next layer
+            usIdle += timing.waitForNextCycle();
+
+            // clear Cube after each layer was displayed, reduces tear to other layers
+            //Tools::drain_cube(gpio);
             Tools::clear_cube(gpio);
-            
+
             // LE off
             gpio.clearPort(LATCH);
         
@@ -131,13 +141,9 @@ int Main::run(int argc, char **argv) {
             
             // LE on
             gpio.setPort(LATCH);
-            
-            // delay until next period in next layer
-            usIdle += timing.waitForNextCycle();
-
-	    // clear Cube after each layer was displayed
-            Tools::clear_cube(gpio);
         }
+        
+        sched_yield();
         
         // performance measurement
         gettimeofday(&current_time, 0);
